@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="stoneholl_connector"
+                 translate="label"
+                 type="text"
+                 sortOrder="20"
+                 showInDefault="1"
+                 showInWebsite="0"
+                 showInStore="0">
+            <label>Connector</label>
+            <tab>stoneholl</tab>
+            <resource>Stoneholl_Connector::config</resource>
+            <group id="general" translate="label comment" type="text" sortOrder="10" showInDefault="1">
+                <label>Automatic Checks</label>
+                <comment>Connector checks are informational and never control installed module functionality.</comment>
+                <field id="automatic_checks"
+                       translate="label comment"
+                       type="select"
+                       sortOrder="10"
+                       showInDefault="1"
+                       canRestore="1">
+                    <label>Enable Automatic Checks</label>
+                    <comment>
+                        Refresh entitlement and compatible release information after pairing.
+                    </comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="check_interval_hours"
+                       translate="label comment"
+                       type="text"
+                       sortOrder="20"
+                       showInDefault="1"
+                       canRestore="1">
+                    <label>Check Interval (Hours)</label>
+                    <comment>Minimum time between automatic attempts. Allowed range: 1 to 168 hours.</comment>
+                    <validate>required-entry validate-digits</validate>
+                    <backend_model>Stoneholl\Connector\Model\Config\Backend\BoundedInteger</backend_model>
+                </field>
+                <field id="stale_after_hours"
+                       translate="label comment"
+                       type="text"
+                       sortOrder="30"
+                       showInDefault="1"
+                       canRestore="1">
+                    <label>Stale Status After (Hours)</label>
+                    <comment>
+                        Mark cached information stale after this many hours without a successful check.
+                        Allowed range: 1 to 720 hours.
+                    </comment>
+                    <validate>required-entry validate-digits</validate>
+                    <backend_model>Stoneholl\Connector\Model\Config\Backend\BoundedInteger</backend_model>
+                </field>
+            </group>
+            <group id="connection" translate="label comment" type="text" sortOrder="20" showInDefault="1">
+                <label>Connection</label>
+                <comment>
+                    Pairing and credentials are managed from Stoneholl &gt; Connector. Account navigation is configured
+                    below; API endpoints remain deployment configuration and are not editable here.
+                </comment>
+                <field id="account_url"
+                       translate="label comment"
+                       type="text"
+                       sortOrder="10"
+                       showInDefault="1"
+                       canRestore="1">
+                    <label>Account URL Override</label>
+                    <comment>
+                        Leave empty to use the Core Marketplace URL followed by /account. Set an HTTPS address
+                        only when the account has a separate location. Existing overrides are retained until cleared.
+                        Credentials, query strings and fragments are not allowed. The API endpoint is unchanged.
+                    </comment>
+                    <config_path>stoneholl_connector/endpoints/account_url</config_path>
+                    <validate>validate-url</validate>
+                    <backend_model>Stoneholl\Connector\Model\Config\Backend\AccountUrl</backend_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

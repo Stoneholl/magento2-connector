@@ -1,0 +1,21 @@
+{
+    "stoneholl_connector_state": {
+        "column": {
+            "state_id": true,
+            "connection_status": true,
+            "installation_id": true,
+            "environment": true,
+            "domain": true,
+            "last_attempt_at": true,
+            "last_success_at": true,
+            "last_error_code": true,
+            "last_error_message": true,
+            "snapshot_json": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

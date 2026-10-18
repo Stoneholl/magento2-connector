@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Stoneholl_Connector::root"
+             title="Connector"
+             module="Stoneholl_Connector"
+             sortOrder="20"
+             parent="Stoneholl_Core::root"
+             action="stoneholl_connector/connection/index"
+             resource="Stoneholl_Connector::view"/>
+    </menu>
+</config>

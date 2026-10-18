@@ -1,0 +1,412 @@
+<?php
+/** @var \Stoneholl\Connector\Block\Adminhtml\Connection $block */
+// phpcs:disable Magento2.Legacy.EscapeMethodsOnBlockClass.Found -- required for Magento 2.3 compatibility.
+// phpcs:disable Generic.Files.LineLength.TooLong -- Keep translated and escaped inline markup locally readable.
+$state = $block->getState();
+$status = $block->getStatus();
+$snapshot = $block->getSnapshot();
+$platform = $block->getPlatform();
+$paired = $block->isPaired();
+$pendingPairing = $block->hasPendingPairing();
+$credentialRejected = $status === \Stoneholl\Connector\Model\ConnectionStatus::CREDENTIAL_REJECTED;
+$pendingForgetMessage = __(
+    'This does not contact Stoneholl. A pending installation or credential may remain active on the server.'
+);
+$unlinkMessage = __('This revokes all server-side credentials for this installation. Continue?');
+$resetAfterUnlinkMessage = __(
+    'Continue only if this installation was already unlinked in Stoneholl Account. '
+    . 'The local Installation ID, rejected credential, and pending Connector workflows will be deleted. '
+    . 'You will need to pair this Magento installation again. Installed modules and perpetual use are not affected.'
+);
+?>
+<div class="stoneholl-connector">
+    <section class="stoneholl-connector__card stoneholl-connector__card--status">
+        <header class="stoneholl-connector__card-header">
+            <div>
+                <h2><?= $block->escapeHtml(__('Connection Status')) ?></h2>
+                <p><?= $block->escapeHtml(__('Current Connector state for this Magento installation.')) ?></p>
+            </div>
+            <span class="stoneholl-connector__status stoneholl-connector__status--<?= $block->escapeHtmlAttr($status) ?>">
+                <?= $block->escapeHtml($block->getStatusLabel()) ?>
+            </span>
+        </header>
+
+        <dl class="stoneholl-connector__details">
+            <div class="stoneholl-connector__detail stoneholl-connector__detail--wide">
+                <dt><?= $block->escapeHtml(__('Installation ID')) ?></dt>
+                <dd><?= $block->escapeHtml((string)$state->getData('installation_id') ?: __('Not available')) ?></dd>
+            </div>
+            <div class="stoneholl-connector__detail">
+                <dt><?= $block->escapeHtml(__('Environment')) ?></dt>
+                <dd><?= $block->escapeHtml((string)$state->getData('environment') ?: __('Not available')) ?></dd>
+            </div>
+            <div class="stoneholl-connector__detail">
+                <dt><?= $block->escapeHtml(__('Installation Host')) ?></dt>
+                <dd><?= $block->escapeHtml((string)$state->getData('domain') ?: $block->getInstallationDomain()) ?></dd>
+            </div>
+            <div class="stoneholl-connector__detail">
+                <dt><?= $block->escapeHtml(__('Last Attempt')) ?></dt>
+                <dd><?= $block->escapeHtml((string)$state->getData('last_attempt_at') ?: __('Never')) ?></dd>
+            </div>
+            <div class="stoneholl-connector__detail">
+                <dt><?= $block->escapeHtml(__('Last Successful Check')) ?></dt>
+                <dd><?= $block->escapeHtml((string)$state->getData('last_success_at') ?: __('Never')) ?></dd>
+            </div>
+            <?php if ($state->getData('last_error_message')): ?>
+                <div class="stoneholl-connector__detail stoneholl-connector__detail--wide stoneholl-connector__detail--error">
+                    <dt><?= $block->escapeHtml(__('Last Check Result')) ?></dt>
+                    <dd><?= $block->escapeHtml((string)$state->getData('last_error_message')) ?></dd>
+                </div>
+            <?php endif; ?>
+        </dl>
+
+        <div class="stoneholl-connector__message" role="note">
+            <?= $block->escapeHtml(
+                __('Connector status is informational. API outages, expired service terms, or disconnection never disable installed module functionality.')
+            ) ?>
+        </div>
+    </section>
+
+    <?php if (!$paired && $block->canPair()): ?>
+        <section class="stoneholl-connector__card stoneholl-connector__card--pairing">
+            <header class="stoneholl-connector__card-header">
+                <div>
+                    <h2><?= $block->escapeHtml(__('Pair This Installation')) ?></h2>
+                    <p><?= $block->escapeHtml(__('Connect Magento to your Stoneholl project.')) ?></p>
+                </div>
+            </header>
+
+            <?php if ($block->getAccountUrl()): ?>
+                <a class="action-secondary stoneholl-connector__account-link stoneholl-connector__tooltip"
+                   href="<?= $block->escapeUrl($block->getAccountUrl()) ?>"
+                   data-tooltip="<?= $block->escapeHtmlAttr(__('Open your Stoneholl account to create a one-time pairing code.')) ?>"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    <?= $block->escapeHtml(__('Create Pairing Code')) ?>
+                </a>
+            <?php endif; ?>
+
+            <p><?= $block->escapeHtml(__('The following data is sent only after you submit the pairing form:')) ?></p>
+            <?php if ($pendingPairing): ?>
+                <div class="message message-warning">
+                    <strong><?= $block->escapeHtml(__('Recoverable attempt pending.')) ?></strong>
+                    <?= $block->escapeHtml(
+                        __('Resubmit the same pairing code and environment, or explicitly forget the pending attempt locally.')
+                    ) ?>
+                </div>
+            <?php endif; ?>
+
+            <dl class="stoneholl-connector__details stoneholl-connector__details--compact">
+                <div class="stoneholl-connector__detail">
+                    <dt><?= $block->escapeHtml(__('Installation Host')) ?></dt>
+                    <dd><?= $block->escapeHtml($block->getInstallationDomain()) ?></dd>
+                </div>
+                <div class="stoneholl-connector__detail">
+                    <dt><?= $block->escapeHtml(__('Magento Edition')) ?></dt>
+                    <dd><?= $block->escapeHtml($platform['magento_edition']) ?></dd>
+                </div>
+                <div class="stoneholl-connector__detail">
+                    <dt><?= $block->escapeHtml(__('Magento Version')) ?></dt>
+                    <dd><?= $block->escapeHtml($platform['magento_version']) ?></dd>
+                </div>
+                <div class="stoneholl-connector__detail">
+                    <dt><?= $block->escapeHtml(__('PHP Version')) ?></dt>
+                    <dd><?= $block->escapeHtml($platform['php_version']) ?></dd>
+                </div>
+                <div class="stoneholl-connector__detail stoneholl-connector__detail--wide">
+                    <dt><?= $block->escapeHtml(__('API Endpoint')) ?></dt>
+                    <dd><?= $block->escapeHtml($block->getApiUrl()) ?></dd>
+                </div>
+            </dl>
+
+            <form class="stoneholl-connector__pairing-form"
+                  action="<?= $block->escapeUrl($block->getPairUrl()) ?>"
+                  method="post">
+                <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                <div class="stoneholl-connector__form-grid">
+                    <div class="admin__field _required">
+                        <label class="admin__field-label" for="pairing_code">
+                            <span><?= $block->escapeHtml(__('Pairing Code')) ?></span>
+                        </label>
+                        <div class="admin__field-control">
+                            <input class="admin__control-text required-entry stoneholl-connector__pairing-code"
+                                   id="pairing_code"
+                                   name="pairing_code"
+                                   type="text"
+                                   maxlength="9"
+                                   autocomplete="off"
+                                   required/>
+                        </div>
+                    </div>
+                    <div class="admin__field _required">
+                        <label class="admin__field-label" for="environment">
+                            <span><?= $block->escapeHtml(__('Environment')) ?></span>
+                        </label>
+                        <div class="admin__field-control">
+                            <select class="admin__control-select required-entry"
+                                    id="environment"
+                                    name="environment"
+                                    required>
+                                <option value="production"><?= $block->escapeHtml(__('Production')) ?></option>
+                                <option value="staging"><?= $block->escapeHtml(__('Staging')) ?></option>
+                                <option value="development"><?= $block->escapeHtml(__('Development')) ?></option>
+                                <option value="test"><?= $block->escapeHtml(__('Test')) ?></option>
+                                <option value="ci"><?= $block->escapeHtml(__('CI')) ?></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button class="action-primary stoneholl-connector__button stoneholl-connector__tooltip"
+                        data-tooltip="<?= $block->escapeHtmlAttr(__('Connect this Magento installation using the entered pairing code.')) ?>"
+                        type="submit">
+                    <span><?= $block->escapeHtml(__('Pair Installation')) ?></span>
+                </button>
+            </form>
+
+            <?php if ($pendingPairing && $block->canDisconnect()): ?>
+                <form class="stoneholl-connector__confirm-action stoneholl-connector__local-action"
+                      action="<?= $block->escapeUrl($block->getForgetUrl()) ?>"
+                      data-confirm-title="<?= $block->escapeHtmlAttr(__('Forget Pending Attempt Locally')) ?>"
+                      data-confirm-content="<?= $block->escapeHtmlAttr($pendingForgetMessage) ?>"
+                      data-confirm-button="<?= $block->escapeHtmlAttr(__('Forget Pending Attempt Locally')) ?>"
+                      method="post">
+                    <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                    <button class="action-secondary stoneholl-connector__button stoneholl-connector__tooltip"
+                            data-tooltip="<?= $block->escapeHtmlAttr(__('Remove the saved local attempt. A pending server-side installation may remain.')) ?>"
+                            type="submit">
+                        <span><?= $block->escapeHtml(__('Forget Pending Attempt Locally')) ?></span>
+                    </button>
+                </form>
+            <?php endif; ?>
+        </section>
+    <?php elseif ($paired): ?>
+        <section class="stoneholl-connector__card stoneholl-connector__card--actions">
+            <header class="stoneholl-connector__card-header">
+                <div>
+                    <h2><?= $block->escapeHtml(__('Connection Actions')) ?></h2>
+                    <p><?= $block->escapeHtml(__('Refresh status or manage this installation connection.')) ?></p>
+                </div>
+            </header>
+
+            <?php if ($credentialRejected): ?>
+                <div class="message message-warning" role="alert">
+                    <strong><?= $block->escapeHtml(__('Connection recovery is required.')) ?></strong>
+                    <p>
+                        <?= $block->escapeHtml(
+                            __('Stoneholl no longer accepts the saved credential. Refresh, credential rotation, and unlink cannot work with it.')
+                        ) ?>
+                    </p>
+                    <p>
+                        <?= $block->escapeHtml(
+                            __('Your installed modules remain enabled and continue to work.')
+                        ) ?>
+                    </p>
+                    <strong><?= $block->escapeHtml(__('What to do now:')) ?></strong>
+                    <ol>
+                        <li>
+                            <?= $block->escapeHtml(
+                                __('Open your Stoneholl account and find the installation with the Installation ID shown on this page.')
+                            ) ?>
+                        </li>
+                        <li>
+                            <?= $block->escapeHtml(
+                                __('Choose Reconnect and create a one-time recovery code for that installation.')
+                            ) ?>
+                        </li>
+                        <li>
+                            <?= $block->escapeHtml(
+                                __('Enter the recovery code below. The Connector will replace the rejected credential without creating another installation.')
+                            ) ?>
+                        </li>
+                    </ol>
+                    <?php if ($block->getAccountUrl()): ?>
+                        <a class="action-secondary stoneholl-connector__account-link stoneholl-connector__tooltip"
+                           href="<?= $block->escapeUrl($block->getAccountUrl()) ?>"
+                           data-tooltip="<?= $block->escapeHtmlAttr(__('Open your Stoneholl account to recover this connection.')) ?>"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            <?= $block->escapeHtml(__('Open Stoneholl Account')) ?>
+                        </a>
+                    <?php endif; ?>
+                    <?php if ($block->canPair()): ?>
+                        <form class="stoneholl-connector__pairing-form"
+                              action="<?= $block->escapeUrl($block->getRecoverUrl()) ?>"
+                              method="post">
+                            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                            <div class="admin__field _required">
+                                <label class="admin__field-label" for="recovery_pairing_code">
+                                    <span><?= $block->escapeHtml(__('Recovery Code')) ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <input class="admin__control-text required-entry stoneholl-connector__pairing-code"
+                                           id="recovery_pairing_code"
+                                           name="pairing_code"
+                                           type="text"
+                                           maxlength="9"
+                                           autocomplete="off"
+                                           required/>
+                                </div>
+                            </div>
+                            <button class="action-primary stoneholl-connector__button stoneholl-connector__tooltip"
+                                    data-tooltip="<?= $block->escapeHtmlAttr(__('Replace the rejected credential for this existing installation.')) ?>"
+                                    type="submit">
+                                <span><?= $block->escapeHtml(__('Reconnect Installation')) ?></span>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                    <?php if ($block->canResetAfterUnlink()): ?>
+                        <form class="stoneholl-connector__confirm-action stoneholl-connector__local-action"
+                              action="<?= $block->escapeUrl($block->getResetAfterUnlinkUrl()) ?>"
+                              data-confirm-title="<?= $block->escapeHtmlAttr(__('Reset after unlink')) ?>"
+                              data-confirm-content="<?= $block->escapeHtmlAttr($resetAfterUnlinkMessage) ?>"
+                              data-confirm-button="<?= $block->escapeHtmlAttr(__('Reset after unlink')) ?>"
+                              method="post">
+                            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                            <button class="action-secondary stoneholl-connector__button stoneholl-connector__button--danger stoneholl-connector__tooltip"
+                                    data-tooltip="<?= $block->escapeHtmlAttr(__('Use only after this exact installation was unlinked in Stoneholl Account. The server must verify it before local data is removed.')) ?>"
+                                    type="submit">
+                                <span><?= $block->escapeHtml(__('Reset after unlink')) ?></span>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            <?php elseif ($pendingPairing && $block->canPair()): ?>
+                <div class="message message-warning">
+                    <?= $block->escapeHtml(
+                        __('Pairing exchange succeeded, but server confirmation is still pending. The encrypted credential and pairing attempt were retained.')
+                    ) ?>
+                </div>
+                <form action="<?= $block->escapeUrl($block->getConfirmUrl()) ?>" method="post">
+                    <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                    <button class="action-primary stoneholl-connector__button stoneholl-connector__tooltip"
+                            data-tooltip="<?= $block->escapeHtmlAttr(__('Retry the final server confirmation without requesting a new pairing code.')) ?>"
+                            type="submit">
+                        <span><?= $block->escapeHtml(__('Retry Pairing Confirmation')) ?></span>
+                    </button>
+                </form>
+            <?php else: ?>
+                <div class="stoneholl-connector__button-row">
+                    <?php if ($block->canRefresh()): ?>
+                        <form action="<?= $block->escapeUrl($block->getRefreshUrl()) ?>" method="post">
+                            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                            <button class="action-primary stoneholl-connector__button stoneholl-connector__tooltip"
+                                    data-tooltip="<?= $block->escapeHtmlAttr(__('Retrieve the latest connection, entitlement, and release information.')) ?>"
+                                    type="submit">
+                                <span><?= $block->escapeHtml(__('Refresh Now')) ?></span>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                    <?php if (!$pendingPairing && $block->canManageCredentials()): ?>
+                        <form action="<?= $block->escapeUrl($block->getRotateUrl()) ?>" method="post">
+                            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                            <button class="action-secondary stoneholl-connector__button stoneholl-connector__tooltip"
+                                    data-tooltip="<?= $block->escapeHtmlAttr(__('Replace the installation credential without disconnecting Magento.')) ?>"
+                                    type="submit">
+                                <span><?= $block->escapeHtml(__('Rotate Credential')) ?></span>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!$credentialRejected && $block->canDisconnect()): ?>
+                <div class="stoneholl-connector__connection-management">
+                    <h3><?= $block->escapeHtml(__('Connection Management')) ?></h3>
+                    <div class="stoneholl-connector__button-row">
+                        <form class="stoneholl-connector__confirm-action"
+                              action="<?= $block->escapeUrl($block->getDisconnectUrl()) ?>"
+                              data-confirm-title="<?= $block->escapeHtmlAttr(__('Unlink Installation')) ?>"
+                              data-confirm-content="<?= $block->escapeHtmlAttr($unlinkMessage) ?>"
+                              data-confirm-button="<?= $block->escapeHtmlAttr(__('Unlink from Stoneholl')) ?>"
+                              method="post">
+                            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                            <button class="action-secondary stoneholl-connector__button stoneholl-connector__tooltip"
+                                    data-tooltip="<?= $block->escapeHtmlAttr(__('Revoke server-side credentials and unlink this installation.')) ?>"
+                                    type="submit">
+                                <span><?= $block->escapeHtml(__('Unlink from Stoneholl')) ?></span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </section>
+    <?php endif; ?>
+
+    <?= $block->getChildHtml('installed_products') ?>
+
+    <section class="stoneholl-connector__card stoneholl-connector__card--entitlements">
+        <header class="stoneholl-connector__card-header">
+            <div>
+                <h2><?= $block->escapeHtml(__('Entitlements and Compatible Releases')) ?></h2>
+                <p><?= $block->escapeHtml(__('Cached package access and compatible release information.')) ?></p>
+            </div>
+        </header>
+
+        <?php if (empty($snapshot['entitlements'])): ?>
+            <div class="stoneholl-connector__empty-state">
+                <?php if ($paired): ?>
+                    <strong><?= $block->escapeHtml(__('No purchased products are assigned to this project.')) ?></strong>
+                    <?= $block->escapeHtml(
+                        __('Purchased or granted products and their compatible releases will appear here after refresh.')
+                    ) ?>
+                <?php else: ?>
+                    <strong><?= $block->escapeHtml(__('Product access is not available yet.')) ?></strong>
+                    <?= $block->escapeHtml(
+                        __('Pair this installation to retrieve purchased products and compatible releases.')
+                    ) ?>
+                <?php endif; ?>
+            </div>
+        <?php else: ?>
+            <?php foreach ($snapshot['entitlements'] as $entitlement): ?>
+                <article class="stoneholl-connector__entitlement">
+                    <div class="stoneholl-connector__entitlement-header">
+                        <h3><?= $block->escapeHtml($entitlement['product_name']) ?></h3>
+                        <p>
+                            <?= $block->escapeHtml(__('Local use: %1', $entitlement['local_use'])) ?> ·
+                            <?= $block->escapeHtml(__('Updates through: %1', $entitlement['updates']['expires_at'] ?: __('Not available'))) ?> ·
+                            <?= $block->escapeHtml(__('Support through: %1', $entitlement['support']['expires_at'] ?: __('Not available'))) ?>
+                        </p>
+                    </div>
+                    <div class="stoneholl-connector__table-scroll">
+                        <table class="data-grid">
+                            <thead>
+                            <tr>
+                                <th class="data-grid-th"><?= $block->escapeHtml(__('Composer Package')) ?></th>
+                                <th class="data-grid-th"><?= $block->escapeHtml(__('Installed Version')) ?></th>
+                                <th class="data-grid-th"><?= $block->escapeHtml(__('Latest Compatible Version')) ?></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($entitlement['package_statuses'] as $package): ?>
+                                <tr>
+                                    <td><?= $block->escapeHtml($package['package']) ?></td>
+                                    <td><?= $block->escapeHtml($package['installed_version'] ?: __('Not detected')) ?></td>
+                                    <td><?= $block->escapeHtml($package['latest_compatible_version'] ?: __('None available')) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </section>
+
+    <?php if ($block->getConfigUrl()): ?>
+        <div class="stoneholl-connector__footer-actions">
+            <a class="action-secondary stoneholl-connector__tooltip"
+               href="<?= $block->escapeUrl($block->getConfigUrl()) ?>"
+               data-tooltip="<?= $block->escapeHtmlAttr(__('Open the Connector configuration settings.')) ?>">
+                <?= $block->escapeHtml(__('Connector Configuration')) ?>
+            </a>
+        </div>
+    <?php endif; ?>
+</div>
+
+<script type="text/x-magento-init">
+{
+    ".stoneholl-connector__confirm-action": {
+        "Stoneholl_Connector/js/confirm-action": {}
+    }
+}
+</script>

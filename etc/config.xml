@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <stoneholl_connector>
+            <general>
+                <automatic_checks>1</automatic_checks>
+                <check_interval_hours>6</check_interval_hours>
+                <stale_after_hours>24</stale_after_hours>
+            </general>
+            <endpoints>
+                <api_url>https://api.stoneholl.com/api/v1</api_url>
+                <account_url/>
+                <repository_url>https://repo.stoneholl.com</repository_url>
+                <allowed_api_hosts>api.stoneholl.com</allowed_api_hosts>
+            </endpoints>
+            <transport>
+                <connect_timeout>5</connect_timeout>
+                <timeout>15</timeout>
+                <maximum_response_bytes>1048576</maximum_response_bytes>
+            </transport>
+            <developer>
+                <fixture_mode>0</fixture_mode>
+            </developer>
+        </stoneholl_connector>
+    </default>
+</config>

@@ -1,0 +1,53 @@
+<?php
+/**
+ * Locally registered metadata, independent of server entitlement state.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$viewModel = $block->getData('installed_products');
+$escaper = $viewModel->getEscaper();
+$products = $viewModel->getProducts();
+?>
+<section class="stoneholl-connector__card stoneholl-connector__card--installed">
+    <header class="stoneholl-connector__card-header">
+        <div>
+            <h2><?= $escaper->escapeHtml(__('Installed Stoneholl Modules')) ?></h2>
+            <p><?= $escaper->escapeHtml(
+                __('Detected locally in Magento, including modules installed from GitHub. Available while offline.')
+            ) ?></p>
+        </div>
+    </header>
+    <?php if (!$products): ?>
+        <div class="stoneholl-connector__empty-state">
+            <?= $escaper->escapeHtml(__('No enabled modules are registered in Stoneholl Core.')) ?>
+        </div>
+    <?php else: ?>
+        <?php foreach ($products as $product): ?>
+            <article class="stoneholl-connector__entitlement">
+                <div class="stoneholl-connector__entitlement-header">
+                    <h3><?= $escaper->escapeHtml($product['name']) ?></h3>
+                    <p><?= $escaper->escapeHtml(implode(', ', $product['modules'])) ?></p>
+                </div>
+                <div class="stoneholl-connector__table-scroll">
+                    <table class="data-grid">
+                        <thead>
+                        <tr>
+                            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Composer Package')) ?></th>
+                            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Installed Version')) ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($product['packages'] as $package): ?>
+                            <tr>
+                                <td><?= $escaper->escapeHtml($package['name']) ?></td>
+                                <td><?= $escaper->escapeHtml($package['version'] ?: __('Not reported')) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</section>

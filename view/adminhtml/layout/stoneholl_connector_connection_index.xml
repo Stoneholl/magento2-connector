@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Stoneholl_Connector::css/connection.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="Stoneholl\Connector\Block\Adminhtml\Connection"
+                   name="stoneholl.connector.connection"
+                   template="Stoneholl_Connector::connection.phtml">
+                <arguments>
+                    <argument name="verified_local_reset_availability"
+                              xsi:type="object">Stoneholl\Connector\Model\VerifiedLocalResetAvailability</argument>
+                </arguments>
+                <block class="Magento\Backend\Block\Template"
+                       name="stoneholl.connector.installed_products"
+                       as="installed_products"
+                       template="Stoneholl_Connector::installed-products.phtml">
+                    <arguments>
+                        <argument name="installed_products"
+                                  xsi:type="object">Stoneholl\Connector\ViewModel\InstalledProducts</argument>
+                    </arguments>
+                </block>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

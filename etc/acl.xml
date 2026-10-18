@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Stoneholl_Core::root">
+                    <resource id="Stoneholl_Connector::root" title="Connector" sortOrder="20">
+                        <resource id="Stoneholl_Connector::view" title="View Connector Status"/>
+                        <resource id="Stoneholl_Connector::pair" title="Pair or Confirm Installation"/>
+                        <resource id="Stoneholl_Connector::refresh" title="Refresh Connector Status"/>
+                        <resource id="Stoneholl_Connector::credentials" title="Rotate Installation Credential"/>
+                        <resource id="Stoneholl_Connector::disconnect" title="Disconnect or Forget Installation"/>
+                        <resource id="Stoneholl_Connector::config" title="Connector Configuration"/>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

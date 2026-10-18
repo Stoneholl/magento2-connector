@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Stoneholl\Connector\Api\TransportInterface"
+                type="Stoneholl\Connector\Model\Api\Transport"/>
+    <!-- Keep Connector's backend instance separate from the scheduler's single-lock legacy instance. -->
+    <virtualType name="StonehollConnectorOperationLockManager" type="Magento\Framework\Lock\Proxy"/>
+    <type name="Stoneholl\Connector\Model\Synchronizer">
+        <arguments>
+            <argument name="lockManager" xsi:type="object">StonehollConnectorOperationLockManager</argument>
+        </arguments>
+    </type>
+    <type name="Stoneholl\Connector\Model\CredentialRotationService">
+        <arguments>
+            <argument name="lockManager" xsi:type="object">StonehollConnectorOperationLockManager</argument>
+        </arguments>
+    </type>
+    <type name="Stoneholl\Connector\Plugin\ConnectionOperationGuard">
+        <arguments>
+            <argument name="lockManager" xsi:type="object">StonehollConnectorOperationLockManager</argument>
+        </arguments>
+    </type>
+    <type name="Stoneholl\Connector\Model\PairingService">
+        <plugin name="stoneholl_connector_operation_guard"
+                type="Stoneholl\Connector\Plugin\ConnectionOperationGuard" sortOrder="10"/>
+    </type>
+    <type name="Stoneholl\Connector\Model\DisconnectService">
+        <plugin name="stoneholl_connector_operation_guard"
+                type="Stoneholl\Connector\Plugin\ConnectionOperationGuard" sortOrder="10"/>
+    </type>
+    <type name="Stoneholl\Connector\Model\VerifiedLocalResetService">
+        <plugin name="stoneholl_connector_operation_guard"
+                type="Stoneholl\Connector\Plugin\ConnectionOperationGuard" sortOrder="10"/>
+    </type>
+    <type name="Stoneholl\Connector\Model\PendingPairingForgetService">
+        <plugin name="stoneholl_connector_operation_guard"
+                type="Stoneholl\Connector\Plugin\ConnectionOperationGuard" sortOrder="10"/>
+    </type>
+    <type name="Stoneholl\Connector\Model\LocalForgetService">
+        <plugin name="stoneholl_connector_operation_guard"
+                type="Stoneholl\Connector\Plugin\ConnectionOperationGuard" sortOrder="10"/>
+    </type>
+    <type name="Stoneholl\Core\Model\ProductRegistry">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="stoneholl_connector" xsi:type="object">Stoneholl\Connector\Model\Core\ProductProvider</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

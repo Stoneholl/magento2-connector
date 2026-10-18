@@ -1,0 +1,24 @@
+{
+    "name": "stoneholl/module-connector",
+    "description": "Optional online account, entitlement, update, and service-status connector for Stoneholl Magento modules.",
+    "type": "magento2-module",
+    "license": "MIT",
+    "require": {
+        "php": "~7.4.0||~8.0.0||~8.1.0||~8.2.0||~8.3.0||~8.4.0||~8.5.0",
+        "stoneholl/module-core": "^1.0",
+        "magento/framework": "102.0.*||103.0.*",
+        "magento/module-backend": "101.0.*||102.0.*",
+        "magento/module-config": "101.1.*||101.2.*",
+        "magento/module-cron": "100.3.*||100.4.*",
+        "magento/module-store": "101.0.*||101.1.*",
+        "magento/module-ui": "101.1.*||101.2.*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Stoneholl\\Connector\\": ""
+        }
+    }
+}
