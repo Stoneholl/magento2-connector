@@ -20,7 +20,7 @@ class ProductProvider implements ProductProviderInterface
             'connector',
             'Stoneholl Connector',
             ['Stoneholl_Connector'],
-            ['stoneholl/module-connector']
+            ['stoneholl/magento2-connector']
         )];
     }
 }

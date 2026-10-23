@@ -6,6 +6,18 @@ namespace Stoneholl\Connector\Model;
 
 class PackageVersionResolver
 {
+    /** @var ComposerPackageIdentity */
+    private $packageIdentity;
+
+    /**
+     * @param ComposerPackageIdentity|null $packageIdentity
+     */
+    public function __construct(?ComposerPackageIdentity $packageIdentity = null)
+    {
+        // Preserve construction through pre-upgrade compiled DI metadata.
+        $this->packageIdentity = $packageIdentity ?? new ComposerPackageIdentity();
+    }
+
     /**
      * Resolve a Composer version when available, returning null for manual or unknown packages.
      *
@@ -14,12 +26,17 @@ class PackageVersionResolver
      */
     public function get(string $packageName): ?string
     {
-        if (!class_exists(\Composer\InstalledVersions::class)
-            || !\Composer\InstalledVersions::isInstalled($packageName)
-        ) {
+        if (!class_exists(\Composer\InstalledVersions::class)) {
             return null;
         }
-        $version = \Composer\InstalledVersions::getPrettyVersion($packageName);
-        return is_string($version) && $version !== '' ? $version : null;
+        foreach ($this->packageIdentity->candidates($packageName) as $candidate) {
+            if (\Composer\InstalledVersions::isInstalled($candidate)) {
+                $version = \Composer\InstalledVersions::getPrettyVersion($candidate);
+                if (is_string($version) && $version !== '') {
+                    return $version;
+                }
+            }
+        }
+        return null;
     }
 }

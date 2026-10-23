@@ -5,11 +5,11 @@ compatible releases. API outages, expired support or revoked credentials never d
 
 ## Install
 
-Requires [Stoneholl Core](https://github.com/Stoneholl/module-core) 1.x, Magento cron and outbound HTTPS.
+Requires [Stoneholl Core](https://github.com/Stoneholl/magento2-core) 1.x, Magento cron and outbound HTTPS.
 Composer installs Core automatically.
 
 ```sh
-composer require stoneholl/module-connector:^1.0
+composer require stoneholl/magento2-connector:^1.0
 bin/magento module:enable Stoneholl_Core Stoneholl_Connector
 bin/magento setup:upgrade
 bin/magento setup:di:compile
@@ -56,3 +56,21 @@ Keep Core while other modules require it. Encrypted configuration and the `stone
 remain; there is no automatic data purge. Back up and complete server unlink/verified reset before intentional cleanup.
 
 [MIT License](LICENSE).
+
+## Composer package naming
+
+Connector normalizes the explicitly migrated legacy Stoneholl package names in entitlement and release responses.
+Installed-version lookup checks the canonical name first, then its corresponding legacy name. Unknown packages and
+upstream Magento identities are preserved. This keeps new Connector installations compatible with a platform that
+still returns legacy package names; it does not change pairing, credentials or installed module availability.
+
+The canonical Composer name is `stoneholl/magento2-connector`. The former `stoneholl/module-connector` name is a legacy identity. The renamed package replaces that identity at `self.version`, so Composer installs one copy of the Magento module. Existing immutable releases remain unchanged.
+
+When migrating an existing root requirement, back up the project and remove the old requirement without updating, then require the new package with its dependencies:
+
+```bash
+composer remove stoneholl/module-connector --no-update
+composer require stoneholl/magento2-connector --with-all-dependencies
+```
+
+Run the Magento upgrade, compilation and cache commands documented above according to your deployment mode. Keep native `Stoneholl_*` module names and configuration paths unchanged.

@@ -1,5 +1,13 @@
 # Changelog
 
+
+## 1.0.1 - 2026-10-23
+
+- Rename the Composer package to `stoneholl/magento2-connector` and replace its corresponding legacy `stoneholl/module-connector` identity at `self.version`.
+- Require the canonical Core package from version 1.0.1 and update installation/migration documentation.
+- Normalize explicitly migrated legacy package names in entitlement/release responses and resolve installed versions through both identities, including pre-upgrade compiled DI.
+- Keep Magento module identifiers, configuration, storage and licensing unchanged.
+
 ## 1.0.0
 - Inherit account navigation from Core Marketplace URL when the optional account override is empty.
 - Preserve existing explicit account destinations and keep API/repository configuration independent.

@@ -4,8 +4,22 @@ declare(strict_types=1);
 
 namespace Stoneholl\Connector\Model\Api;
 
+use Stoneholl\Connector\Model\ComposerPackageIdentity;
+
 class ResponseNormalizer
 {
+    /** @var ComposerPackageIdentity */
+    private $packageIdentity;
+
+    /**
+     * @param ComposerPackageIdentity|null $packageIdentity
+     */
+    public function __construct(?ComposerPackageIdentity $packageIdentity = null)
+    {
+        // Preserve construction through pre-upgrade compiled DI metadata.
+        $this->packageIdentity = $packageIdentity ?? new ComposerPackageIdentity();
+    }
+
     private const REQUIRED_LIMITS = [
         'request_body_bytes' => 16384,
         'response_body_bytes' => 1048576,
@@ -227,7 +241,7 @@ class ResponseNormalizer
                         'The entitlement response contains an invalid package name.'
                     );
                 }
-                $packages[] = $packageName;
+                $packages[] = $this->packageIdentity->canonical($packageName);
             }
             $result[] = [
                 'id' => substr((string)($item['id'] ?? ''), 0, 64),
@@ -263,6 +277,7 @@ class ResponseNormalizer
             ) {
                 throw new ApiException('invalid_response', 'The release response contains invalid package metadata.');
             }
+            $package = $this->packageIdentity->canonical($package);
             $result[$package] = [
                 'package' => $package,
                 'version' => $version,
