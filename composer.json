@@ -1,6 +1,6 @@
 {
     "name": "stoneholl/magento2-connector",
-    "description": "Optional online account, entitlement, update, and service-status connector for Stoneholl Magento modules.",
+    "description": "Optional online account, entitlement, update, and service-status connector for Stoneholl Magento 2 modules.",
     "type": "magento2-module",
     "license": "MIT",
     "require": {
@@ -23,5 +23,16 @@
     },
     "replace": {
         "stoneholl/module-connector": "self.version"
-    }
+    },
+    "keywords": [
+        "magento2",
+        "magento",
+        "magento 2",
+        "magento2 module",
+        "magento open source",
+        "admin",
+        "connector",
+        "account pairing",
+        "updates"
+    ]
 }
